@@ -7,6 +7,12 @@
                 </div>
                 <div class="card-body">
                     <form @submit.prevent="create">
+                        <p v-if="errors.length">
+                            <b>Please correct the following error(s):</b>
+                            <ul>
+                                <li v-for="(item,key) in errors" :key="key">{{ item }}</li>
+                            </ul>
+                        </p>
                         <div class="row">
                           <div class="col-12 mb-2">
                                 <div class="form-group">
@@ -24,13 +30,13 @@
                             <div class="col-12 mb-2">
                                 <div class="form-group">
                                     <label>Quantity*</label>
-                                    <input type="text" class="form-control" v-model="quantity" required>
+                                    <input type="text" class="form-control" v-model="quantity" v-validate="'required'" data-vv-validate-on="blur">
                                 </div>
                             </div>
                             <div class="col-12 mb-2">
                                 <div class="form-group">
                                     <label>Unit Cost*</label>
-                                    <input type="text" class="form-control" v-model="unitCost" required>
+                                    <input type="text" class="form-control" v-model="unitCost" v-validate="'required'" data-vv-validate-on="blur">
                                 </div>
                             </div>
                             <div class="col-12 mb-2">
@@ -99,6 +105,7 @@ export default {
     name:"sales",
     data(){
         return {
+            errors: [],
             sales:[],
             products:[],
             quantity:'',
@@ -121,34 +128,47 @@ export default {
               console.log(error)
           })
         },
-        async create(){
-          let profitMarginPersentage = 25; // margin default value 25
-          if (this.product != null && this.product.profit_margin) {
-            profitMarginPersentage = this.product.profit_margin;
-          }
-          let profitMargin = profitMarginPersentage / 100;
-          this.calculateSellingPrice(profitMargin);
-          let payload = {
-            product: this.product != null ? this.product.id : null,
-            quantity: this.quantity,
-            unitCost: this.unitCost,
-            sellingPrice: this.sellingPrice,
-            profitMargin: profitMargin,
-            shippingCost: this.shippingCost
-          };
-          await axios.post('/api/sale/create',payload).then(response=>{
-             this.getsales();
-             this.product = '';
-             this.quantity = '';
-             this.unitCost= '';
-             this.sellingPrice = '';
-          }).catch(error=>{
-              console.log(error)
-          })
+        create(){
+            this.checkForm();
+            let profitMarginPersentage = 25; // margin default value 25
+            if (this.product != null && this.product.profit_margin) {
+                profitMarginPersentage = this.product.profit_margin;
+            }
+            let profitMargin = profitMarginPersentage / 100;
+            this.calculateSellingPrice(profitMargin);
+            let payload = {
+                product: this.product != null ? this.product.id : null,
+                quantity: this.quantity,
+                unitCost: this.unitCost,
+                sellingPrice: this.sellingPrice,
+                profitMargin: profitMargin,
+                shippingCost: this.shippingCost
+            };
+            axios.post('/api/sale/create',payload).then(response=>{
+                this.getsales();
+                this.product = '';
+                this.quantity = '';
+                this.unitCost= '';
+                this.sellingPrice = '';
+                this.errors = [];
+            }).catch(error=>{
+                this.errors = [];
+                this.errors.push(error.response.data.message);
+            })
         },
-        async calculateSellingPrice(profitMargin){
+        calculateSellingPrice(profitMargin){
           let cost = (this.unitCost * this.quantity);
           this.sellingPrice = ((cost / (1 - profitMargin)) + parseInt(this.shippingCost)).toFixed(2);
+        },
+        checkForm(){
+            if (!this.quantity) {
+                this.errors.push('Quantity is required.');
+                e.preventDefault();
+            }
+            if (!this.unitCost) {
+                this.errors.push('Unit cost is required.');
+                e.preventDefault();
+            }
         }
     }
 }

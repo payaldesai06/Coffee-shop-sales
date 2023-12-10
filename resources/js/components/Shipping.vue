@@ -7,11 +7,17 @@
                 </div>
                 <div class="card-body">
                     <form @submit.prevent="create">
+                        <p v-if="errors.length">
+                            <b>Please correct the following error(s):</b>
+                            <ul>
+                                <li v-for="(item,key) in errors" :key="key">{{ item }}</li>
+                            </ul>
+                        </p>
                         <div class="row">
                             <div class="col-12 mb-2">
                                 <div class="form-group">
                                     <label>Shipping Cost*</label>
-                                    <input type="text" class="form-control" v-model="shippingCost" required>
+                                    <input type="text" class="form-control" v-model="shippingCost" v-validate="'required'" data-vv-validate-on="blur">
                                 </div>
                             </div>
                             <div class="col-12">
@@ -65,6 +71,7 @@ export default {
     name:"shippings",
     data(){
         return {
+            errors: [],
             shippings:[],
             shippingCost:'',
         }
@@ -80,16 +87,25 @@ export default {
               console.log(error)
           })
         },
-        async create(){
+        create(){
+          this.checkForm();
           let payload = {
             shippingCost: this.shippingCost
           };
-          await axios.post('/api/shipping/create',payload).then(response=>{
+          axios.post('/api/shipping/create',payload).then(response=>{
              this.getshippings();
              this.shippingCost = '';
+             this.errors = [];
           }).catch(error=>{
-              console.log(error)
+             this.errors = [];
+             this.errors.push(error.response.data.message);
           })
+        },
+        checkForm(){
+            if (!this.shippingCost) {
+                this.errors.push('Shipping cost is required.');
+                e.preventDefault();
+            }
         },
     }
 }
