@@ -1,5 +1,9 @@
 # Cyber-Duck Laravel task
 
+Back-end: Laravel 
+
+Front-end: Vue Js
+
 Steps to setup:
 
     composer install 
