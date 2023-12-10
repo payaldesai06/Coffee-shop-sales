@@ -1,16 +1,16 @@
 # Cyber-Duck Laravel task
 
-Documentation should be kept in the `docs` folder
+Steps to setup:
 
-## TABLE OF CONTENTS
+    composer install 
+    cp .env.example .env
+    php artisan key:generate
+    php artisan migrate:fresh --seed
+    npm install
 
-| Title                  | File                                 |
-|------------------------|--------------------------------------|
-| LOCAL DEV SETUP        | `docs/01-local-development-setup.md` |
-| TESTING                | `docs/02-testing.md`                 |
-| PACKAGES               | `docs/03-packages.md`                |
-| LOCAL DATA             | `docs/04-local-data.md`              |
+To run the project have to call both of this command at a time with different terminal:
 
-----
+    npm run watch
+    php artisan serve
 
-Made with ♥ by [Cyber-Duck Ltd](https://www.cyber-duck.co.uk).
+Testing video: https://www.loom.com/share/410631b1bef74b95877f18e5b2dcf31d
